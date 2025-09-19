@@ -3,48 +3,17 @@ import java.util.function.BiFunction;
 
 public class Main {
     public static void main(String[] args) {
-        char operator;
-        double result = 0.0;
-        boolean hasResult = false;
+
+
         List<String> story = new ArrayList<>();
         Scanner input = new Scanner(System.in);
 
-        do {
-            System.out.println("Choose an operator: +, -, *, / or q to quit");
-            operator = input.next().charAt(0);
-
-            if (operator == 'q') {
-                printHistory(story);
-                System.out.println("Exiting calculator...");
-
-                break;
-            }
-
-            if (!isValidOperator(operator)) {
-                System.out.println("Invalid Operator!");
-                continue;
-            }
-
-            double number1 = continueWithTheLastNum(hasResult, input, result);
-
-            double number2 = readNumber(input, "Enter your second number:");
-
-            try {
-                double current = calculation(operator, number1, number2, story);
-                System.out.println(number1 + " " + operator + " " + number2 + " = " + current);
-                System.out.println("Last result: " + current);
-                result = current;
-                hasResult = true;
-            } catch (ArithmeticException ae) {
-                System.out.println("Error: " + ae.getMessage());
-            }
-        } while (true);
-
-        input.close();
+       startCalculator(input, story);
+       input.close();
     }
 
     private static boolean isValidOperator(char op) {
-        return op == '+' || op == '-' || op == '*' || op == '/';
+        return op == '+' || op == '-' || op == '*' || op == '/' || op == '%';
     }
 
     private static double readNumber(Scanner input, String prompt) {
@@ -54,7 +23,7 @@ public class Main {
                 return input.nextDouble();
             } else {
                 System.out.println("Error: debes ingresar un número.");
-                input.next(); // descarta la basura
+                input.next();
             }
         }
     }
@@ -69,6 +38,7 @@ public class Main {
             if (b == 0) throw new ArithmeticException("Division by zero");
             return a / b;
         });
+        operation.put('%',(a,b)-> a % b);
         double result = operation.get(operator).apply(num1, num2);
         saveOperation(story, operator, num1, num2, result);
         return result;
@@ -101,6 +71,48 @@ public class Main {
         for (String record : story) {
             System.out.println(record);
         }
+    }
+
+    public static void startCalculator(Scanner input, List<String> story){
+        double result = 0.0;
+        char operator;
+        boolean hasResult = false;
+
+        while(true){
+            operator = readOperator(input);
+            if (operator == 'q') {
+                printHistory(story);
+                System.out.println("Exiting calculator...");
+                break;
+            }
+            if (!isValidOperator(operator)) {
+                System.out.println("Invalid Operator!");
+                continue;
+            }
+            double number1 = continueWithTheLastNum(hasResult, input, result);
+
+            double number2 = readNumber(input, "Enter your second number:");
+
+            try {
+                double current = calculation(operator, number1, number2, story);
+                showResult(operator,number1,number2,current);
+
+                result = current;
+                hasResult = true;
+            } catch (ArithmeticException ae) {
+                System.out.println("Error: " + ae.getMessage());
+            }
+        }
+    }
+
+    public static char readOperator(Scanner input){
+        System.out.println("Choose an operator: +, -, *, /, % or q to quit");
+        return input.next().charAt(0);
+    }
+
+    public static void showResult(char op, double num1 ,double num2, double current){
+        System.out.println(num1 + " " + op + " " + num2 +  " = " + current);
+
     }
 }
 
